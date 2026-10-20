@@ -2,15 +2,21 @@
 
 ## 1. System Architecture
 
-This game is a standalone 2D side-scrolling platformer built in Python using the `pygame` library. The architecture relies on a standard **Game Loop Model**.
+This game is a standalone 2D side-scrolling platformer built in Python using the `pygame` library. The architecture relies on an **Object-Oriented Game Loop Model**, encapsulated within a central `Game` class.
+
+- `__init__()`: Initializes the Pygame engine, loads configuration from `settings.py`, and creates the main display surface.
+- `events()`: Handles input (keyboard) and system events (quitting).
+- `update()`: Processes physics, gravity, and collision detection.
+- `draw()`: Renders the background, UI, and all sprite groups to the screen.
+- `run()`: The infinite `while` loop that calls the above methods at a locked 60 FPS.
 
 ```mermaid
 graph TD
-    A[Initialization & Load Assets] --> B[Start Screen Dialog]
-    B --> C[Main Game Loop at 60 FPS]
-    C --> D[Event Handling Input]
-    C --> E[Physics & Collision Update]
-    C --> F[Render Frame with Camera Offset]
+    A[Game.__init__] --> B[Start Screen Dialog]
+    B --> C[Game.run loop at 60 FPS]
+    C --> D[Game.events]
+    C --> E[Game.update]
+    C --> F[Game.draw]
     F --> C
 ```
 
@@ -39,8 +45,10 @@ We will implement a clean, retro-style UI overlay using `pygame.font`.
 - **Rendering**: The text will be rendered on top of the game board every frame so it is always visible.
 
 ### 2.4 Sprites (`sprites.py`)
+**Architectural Decision**: For the initial scope of the game, all sprite classes will be housed in a single `sprites.py` file (The Monolith approach). This prevents circular import issues common in Pygame. If the file grows too large during enemy AI implementation, it will be refactored categorically into `player.py`, `enemies.py`, and `environment.py`.
+
 All physical entities in the game will inherit from `pygame.sprite.Sprite`.
-- **Static Sprites**: `Platform`, `Ladder`, `Coin`, `Portal` (Levels 1-9), `Queen` (Level 10). These have fixed positions. 
+- **Static Sprites**: `Platform`, `Ladder`, `BrokenLadder` (randomized visuals), `Coin`, `Portal` (Levels 1-9), `Queen` (Level 10). These have fixed positions. 
 - **Dynamic Sprites**: 
   - `Player`: Will handle sub-pixel position tracking, applying vertical velocity (gravity), jumping state, animation frames, and checking collisions against `Platform` and `Ladder` groups.
   - `Donkey`: Will contain state logic to pace left and right on its designated platform and spawn `Fireball` sprites on a timer.

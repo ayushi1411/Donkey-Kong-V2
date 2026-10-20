@@ -13,14 +13,18 @@ Create a file to store all global variables so you don't have "magic numbers" in
 ---
 
 ## Step 2: Level Generation (`level_generator.py`)
-You will build a procedural map generator that outputs a 2D matrix (a list of lists containing strings like `"x"`, `"H"`, etc.) for the Pygame engine to read.
-1. **Initialize the Matrix**: Create a 2D list of `WORLD_WIDTH // 16` columns and `HEIGHT // 16` rows filled with empty spaces `" "`.
-2. **Create Floors**: Loop through the rows. Every 4 or 5 rows, fill the entire row with `"x"` (platforms). 
-3. **Random Gaps**: For each floor row, randomly replace small chunks of `"x"` with `" "` to create gaps the player must jump over.
-4. **Create Ladders**: For each floor, randomly pick 2-3 column indexes (making sure at least one is on the far left and one is on the far right). Fill the rows connecting the current floor to the floor above it with `"H"` to create ladders.
+> [!NOTE]
+> **Why use a Matrix / Markers? (Tile Mapping)**
+> Instead of randomly spawning Image Sprites onto the screen (which could cause overlapping platforms or floating ladders), we first generate a 2D matrix (a list of lists) of data "markers". This acts as a logical blueprint. It allows us to calculate the math for the level efficiently. Once the blueprint is finished, we pass it to `main_pygame.py` which reads the markers and spawns the actual Sprites in the correct physical locations!
+
+You will build a procedural map generator that outputs this 2D matrix (containing internal markers like `Platform`, `Ladder`, `Space`) for the Pygame engine to read.
+1. **Initialize the Matrix**: Create a 2D list of `WORLD_WIDTH // 16` columns and `HEIGHT // 16` rows filled with empty `Space` markers.
+2. **Create Floors**: Loop through the rows. Every 4 or 5 rows, fill the entire row with the `Platform` marker. 
+3. **Random Gaps**: For each floor row, randomly replace small chunks of `Platform` markers with `Space` markers to create gaps the player must jump over.
+4. **Create Ladders**: For each floor, randomly pick 2-3 column indexes (making sure at least one is on the far left and one is on the far right). Fill the rows connecting the current floor to the floor above it with the `Ladder` marker.
 5. **Portals and Queens**: 
-   - If `level < 10`: Randomly pick an empty space (`" "`) in the top half of the map that is NOT directly touching a floor or ladder, and set it to `"P"` (Portal).
-   - If `level == 10`: Place the Queen `"Q"` in a custom built "cage" made of `"x"` tiles at the top center of the map.
+   - If `level < 10`: Randomly pick an empty `Space` marker in the top half of the map that is NOT directly touching a floor or ladder, and replace it with a `Portal` marker.
+   - If `level == 10`: Place the `Queen` marker in a custom built "cage" made of `Platform` markers at the top center of the map.
 6. **Return the Matrix**: Provide a function `generate_level(level_num)` that runs this logic and returns the matrix.
 
 ---
@@ -93,12 +97,15 @@ This ties everything together.
 - `score = 0`
 - `coins = 0`
 
-### 5.3 Loading a Level
+### 5.3 Loading a Level and Spawning Sprites
 Write a function `load_level(level_number)`:
 - Call `matrix = generate_level(level_number)` from `level_generator.py`.
 - Loop through `matrix` row by row and column by column.
-- If you see `"x"`, create a `Platform` sprite at `x = col * 16, y = row * 16`.
-- Add all these sprites to Pygame `pygame.sprite.Group()` objects (e.g., `platform_group`, `coin_group`).
+- If you see a `Platform` marker, spawn a `Platform` Sprite at `x = col * 16, y = row * 16`.
+- If you see a `Ladder` marker, spawn a `Ladder` Sprite.
+- If you see a `Portal` marker, spawn a `Portal` Sprite.
+- If you see a `Queen` marker, spawn a `Queen` Sprite.
+- Add all these newly spawned sprites to Pygame `pygame.sprite.Group()` objects (e.g., `platform_group`, `portal_group`).
 
 ### 5.4 The Start Screen / Story Dialog
 Before entering the main game loop, you need a blocking loop to show the story:
