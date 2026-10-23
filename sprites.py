@@ -14,9 +14,10 @@ class Character(pygame.sprite.Sprite):
             self.float_y = float(self.rect.y)
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, width = 96, height = 32):
         super().__init__()
-        self.image = pygame.image.load('assets/platform.png').convert_alpha()
+        raw_image = pygame.image.load('assets/platform.png').convert_alpha()
+        self.image = pygame.transform.scale(raw_image, (width, height))
         self.rect = self.image.get_rect(topleft=(x, y))
 
 class Ladder(pygame.sprite.Sprite):
@@ -45,8 +46,9 @@ class Queen(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
 class Player(Character):
-    def __init__(self, x, y):
+    def __init__(self, x, y, physics):
         super().__init__()
+        self.physics = physics #store reference to the physics helper
         self.idle_image_right = pygame.image.load('assets/player_idle_right.png').convert_alpha()
         self.idle_image_left = pygame.transform.flip(self.idle_image_right, True, False)
         self.image = self.idle_image_right
@@ -107,6 +109,8 @@ class Player(Character):
             self.vel_x = self.settings.PLAYER_SPEED
             self.facing_right = True
         self.rect.x += self.vel_x
+
+        self.physics.check_horizontal_collision(self)  # Check for horizontal collisions with platforms
 
         # --- Animation (jump takes highest priority) ---
         if self.is_jumping:

@@ -2,6 +2,8 @@ import sys
 import pygame
 from settings import *
 from sprites import Player
+from sprites import Platform
+from physics import Physics
 
 class Game:
     def __init__(self):
@@ -12,7 +14,16 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.all_sprites = pygame.sprite.Group()
-        self.player = Player(self.settings.PLAYER_START_X, self.settings.PLAYER_START_Y)
+        # temp creating platforms for testing
+        self.platforms = pygame.sprite.Group()
+        platform1 = Platform(0, 500, width=1280, height=50)  # ground platform
+        platform2 = Platform(200, 400, width=100, height=100)
+        platform3 = Platform(400, 300, width=100, height=100)
+        self.platforms.add(platform1, platform2, platform3)
+        self.all_sprites.add(self.platforms)
+
+        self.physics = Physics(self.platforms)
+        self.player = Player(self.settings.PLAYER_START_X, self.settings.PLAYER_START_Y, self.physics)
         self.all_sprites.add(self.player)
 
     def run(self):

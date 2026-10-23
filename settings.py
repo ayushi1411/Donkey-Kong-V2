@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class Settings:
     # screen settings
     SCREEN_WIDTH: int = 1280
-    SCREEN_HEIGHT: int = 528
+    SCREEN_HEIGHT: int = 500
     TILE_SIZE: int = 16
     WORLD_WIDTH: int = 200 * 16
 
